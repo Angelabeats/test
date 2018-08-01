@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+        
+        <!-- 加载配置文件 -->
+        <context:property-placeholder location="classpath:db.properties"/>
+        <!-- 数据连接池，使用dbcp -->
+        <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        	<property name="driverClassName" value="${jdbc.driver}"></property>
+        	<property name="url" value="${jdbc.url}"></property>
+        	<property name="username" value="${jdbc.username}"></property>
+        	<property name="password" value="${jdbc.password}"></property>
+        	<!-- <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        	<property name="url" value="jdbc:mysql://localhost:3306/mybatis?characterEncoding=utf8&amp;
+        		allowPublicKeyRetrieval=true&amp;useSSL=false&amp;serverTimezone=UTC"></property>
+        	<property name="username" value="root"></property>
+        	<property name="password" value="root"></property> -->
+        	<property name="maxActive" value="10"></property>
+        	<property name="maxIdle" value="5"></property>
+        </bean>
+        
+        <!-- sqlSessionFactory  到mybatis-spring的jar包中找-->
+        <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        	<!-- 加载mybatis配置文件 -->
+        	<property name="configLocation" value="classpath:mybatis/SqlMapConfig.xml"></property>
+        	<!-- 数据源 -->
+        	<property name="dataSource" ref="dataSource"></property>
+        </bean>
+        
+        <!-- mapper配置
+        	根据mapper接口生成代理对象
+        	缺点：每一个mapper都需写一次
+         -->
+        <!-- <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        	<property name="mapperInterface" value="cn.itcast.mapper.UserMapper"></property>
+        	<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+        </bean> -->
+        
+        <!-- 批量扫描mapper
+         	从包中扫描出接口，自动创建代理对象且在spring容器中注册
+         	规范：使用 mapper代理方法   mapper接口和xml同名且在同一目录下
+         	bean的id为mapper类名(首字母小写)  -->
+        <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        	<!-- 不能使用通配符，每个包名间用逗号间隔 -->
+        	<property name="basePackage" value="cn.itcast.ssm.mapper"></property>
+        	<!-- 使用name="sqlSessionFactory" 会导致context:property-placeholder后于sqlSessionFactory执行
+        		导致出错-->
+        	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        </bean>
+</beans>

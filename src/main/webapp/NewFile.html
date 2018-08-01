@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>GodEye</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0">
+    <!--  <meta http-equiv="Access-Control-Allow-Origin" content="*">  -->
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    h1 {
+        text-align: center;
+    }
+    #left {
+        margin-left: 50px;
+        width: 500px;
+    }
+    #qrcode-showtext {
+        height: 50px;
+    }
+    .container {
+        display: flex;
+        margin: auto 0;
+    }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <h1 class="text-center">录制 </h1>
+        <div class="container">
+            <div class="form" id="left">
+                <dl class="row">
+                    <dt>输入标题 </dt>
+                    <dd>
+                        <label>
+                            <input type="text" id="qrcode-text" class="input" size="30" placeholder="输入用户uid">
+                        </label>
+                    </dd>
+                </dl>
+                <dl class="row">
+                    <dt>Case 名称 </dt>
+                    <dd id="qrcode-showtext">
+                    </dd>
+                </dl>
+                <dl class="row">
+                    <dt>扫码开始录制 </dt>
+                    <dd>
+                        <div id="qrcode">
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <script src="qrcodejs-master/jquery.min.js"></script>
+
+    <script src="qrcodejs-master/qrcode.min.js"></script>
+    <script>
+    /* globals QRCode */
+    (function () {
+        let qrcode = new QRCode(document.getElementById('qrcode'), {
+            width: 256,
+            height: 256
+        });
+
+  //       var timer = setInterval(function() {
+  //            let text = document.getElementById('qrcode-text');
+  //            timestamp = (new Date()).valueOf();
+  //            qrcode.makeCode(text + timestamp);
+                // }, 1000)
+                $('#qrcode-text').on('change', function () {
+                        let text = this.value;
+                        timestamp = (new Date()).valueOf();
+                        let tmp_title = String(text) + "_" +String(timestamp);
+                parent.postMessage(java.net.URLEncoder.encode('uid:' +text), '*');
+                qrcode.makeCode(tmp_title);
+                $('#qrcode-showtext').text(tmp_title);
+                });
+
+    }
+    )();
+    </script>
+</body>
+</html>

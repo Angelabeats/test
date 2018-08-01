@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>   
+<beans xmlns="http://www.springframework.org/schema/beans"        
+    xmlns:mvc="http://www.springframework.org/schema/mvc"     
+    xmlns:tx="http://www.springframework.org/schema/tx"  
+    xmlns:aop="http://www.springframework.org/schema/aop"  
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"              
+    xsi:schemaLocation="                                               
+            http://www.springframework.org/schema/beans    
+            http://www.springframework.org/schema/beans/spring-beans.xsd    
+            http://www.springframework.org/schema/context     
+            http://www.springframework.org/schema/context/spring-context.xsd    
+            http://www.springframework.org/schema/mvc    
+            http://www.springframework.org/schema/mvc/spring-mvc.xsd  
+            http://www.springframework.org/schema/tx   
+            http://www.springframework.org/schema/tx/spring-tx.xsd  
+            http://www.springframework.org/schema/aop  
+            http://www.springframework.org/schema/aop/spring-aop.xsd "  
+    default-autowire="byName">     
+        
+        <!-- 在/org/springframework/web/servlet/DispatcherServlet.properties中配置了默认的映射器和适配器等 
+        	spring3.1之后默认使用org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter注解适配器
+        	spring3.1之后默认使用org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping注解映射器-->
+        
+       <!-- 非注解的Handler可以单个配置
+       		实际开发中建议使用组件扫描 
+       		可以扫描Controller Service-->
+       <!-- <bean class="cn.itcast.ssm.ItemsContrllerAnno3"></bean> -->
+       <context:component-scan base-package="cn.itcast.ssm.controller"></context:component-scan>
+       
+       
+       <!-- 处理器适配器  要求Handler实现Controller接口 -->
+       <!-- <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"></bean> -->
+       <!--要求实现HttpRequestHandler接口-->
+       <!-- <bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"></bean> -->
+       
+       <!-- 注解映射器 -->
+       <!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"></bean> -->
+       <!-- 注解适配器 -->
+       <!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"></bean> -->
+       <!-- 使用mvc注解代替上边的注解映射器和适配器；
+       	默认加载很多的参数绑定方法，比如json转换器 -->
+       <mvc:annotation-driven conversion-service="conversionService"
+       		validator="validator"></mvc:annotation-driven>
+       
+       <!-- 自定义参数绑定 -->
+       <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+       		<!-- 转换器 -->
+       		<property name="converters">
+       			<list>
+       				<!-- 自动类型转换 -->
+       				<bean class="cn.itcast.ssm.contrller.converter.CustomDataConverter"></bean>
+       			</list>
+   			</property>
+       </bean>
+       
+       <!-- 视图解析器   解析jsp视图，默认使用jstl标签-->
+       <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+       		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
+       		<!-- 前缀 -->
+       		<property name="prefix" value="/WEB-INF/jsp/"></property>
+       		<!-- 后缀 -->
+       		<property name="suffix" value=".jsp"></property>
+       </bean>
+       
+		<!-- 配置校验器 -->
+		<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		    <!-- 校验器，使用hibernate校验器 -->
+		    <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
+		    <!-- 指定校验使用的资源文件，在文件中配置校验错误信息，如果不指定则默认使用classpath下面的ValidationMessages.properties文件 -->
+		    <property name="validationMessageSource" ref="messageSource"/>
+		</bean>
+		<!-- 校验错误信息配置文件 -->
+		<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		    <!-- 资源文件名 -->
+		    <property name="basenames">
+		        <list>
+		            <value>classpath:CustomValidationMessage</value>
+		        </list>
+		    </property>
+		    <!-- 资源文件编码格式 -->
+		    <property name="fileEncodings" value="utf-8"/>
+		    <!-- 对资源文件内容缓存时间，单位秒 -->
+		    <property name="cacheSeconds" value="120"/>
+		</bean>
+		<!-- 全局异常处理器 
+		只要实现org.springframework.web.servlet.HandlerExceptionResolver-->
+		<bean class="cn.itcast.ssm.exception.CustomExceptionResolver"></bean>
+		<!-- 文件上传 -->
+		<bean id="mutipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置上传图片最大尺寸 -->
+			<property name="maxUploadSize">
+				<value>5242880</value>
+			</property>
+		</bean>
+</beans>
